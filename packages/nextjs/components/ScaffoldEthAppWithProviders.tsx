@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ImpersonatorIframeProvider } from "@impersonator/iframe";
 import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
 import { useTheme } from "next-themes";
 import { Toaster } from "react-hot-toast";
@@ -53,7 +54,9 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
         avatar={BlockieAvatar}
         theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
       >
-        <ScaffoldEthApp>{children}</ScaffoldEthApp>
+        <ImpersonatorIframeProvider>
+          <ScaffoldEthApp>{children}</ScaffoldEthApp>
+        </ImpersonatorIframeProvider>
       </RainbowKitProvider>
     </WagmiConfig>
   );
