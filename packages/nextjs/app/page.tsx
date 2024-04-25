@@ -25,11 +25,12 @@ const Home: NextPage = () => {
   const [balance, setBalance] = useState<bigint>(0n);
   const [address, setAddress] = useState("");
   const [txValue, setTxValue] = useState<string | bigint>("");
+  const [tokensData, setTokensData] = useState<any>([]);
   const { latestTransaction, onUserTxConfirm, onTxReject } = useImpersonatorIframe();
 
   const alchemy = new Alchemy({
     network: Network.ETH_SEPOLIA,
-    apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || "",
+    apiKey: "",
   });
 
   const [web3auth, setWeb3auth] = useState(null);
@@ -51,7 +52,7 @@ const Home: NextPage = () => {
   const createWallet = async () => {
     try {
       const chain: typeof sepolia = sepolia;
-      const apiKeyAlchemy = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || "";
+      const apiKeyAlchemy = "";
       const provider = await createModularAccountAlchemyClient({
         apiKey: apiKeyAlchemy as string,
         chain,
@@ -99,9 +100,17 @@ const Home: NextPage = () => {
   }
 
   const tokenBalancers = async () => {
-    console.log(provider);
-    const tokenBalances = await provider.core.getTokenBalances(accountAddress);
-    console.log(tokenBalances);
+    const tokenData = [];
+    const data = await alchemy.core.getTokensForOwner(accountAddress);
+    console.log(data.tokens);
+    for (let i = 0; i < data.tokens.length; i++) {
+      const balance = data.tokens[i].balance;
+      const symbol = data.tokens[i].symbol;
+      const image = data.tokens[i].logo;
+      tokenData.push({ balance, symbol, image });
+    }
+    setTokensData(tokenData);
+    console.log(tokenData);
   };
 
   const webAddress = async () => {
@@ -139,19 +148,19 @@ const Home: NextPage = () => {
         type: "function",
       },
     ];
-
+    console.log(address);
     const uoCallData = encodeFunctionData({
       abi: contractABI,
       functionName: "transfer",
-      args: [{ address }, parseEther({ txValue }.toString())],
+      args: [`${address}`, parseEther(txValue.toString())],
     });
     console.log(uoCallData);
 
     const { hash } = await provider.sendUserOperation({
       uo: {
-        target: { address },
+        target: address,
         data: uoCallData,
-        value: parseUnits({ txValue }, 18).toString(),
+        value: parseUnits(txValue.toString(), 18),
       },
     });
     setUoHash(hash);
@@ -159,6 +168,7 @@ const Home: NextPage = () => {
     const transactionHash = await provider.waitForUserOperationTransaction({ hash });
     setTxHash(transactionHash);
   };
+
   useEffect(() => {
     const swap = async () => {
       if (latestTransaction) {
@@ -206,16 +216,20 @@ const Home: NextPage = () => {
                   <h2 className="card-title">Hello, {userNameAuth.name}:</h2>
                   <p>
                     <Address address={accountAddress} />
+                    <p>Balance:</p>
+                    <p>{balance.toString()}</p>
+                    {tokensData.map((token: any, index: any) => {
+                      return (
+                        <div key={index}>
+                          <p>{token.symbol}</p>
+                          <p>{token.balance}</p>
+                          {/* <img src={token.image} alt="token" /> */}
+                        </div>
+                      );
+                    })}
                   </p>
-                  {/* <p>Balance:</p>
-                  <p>{balance.toString()}</p> */}
                 </div>
               </div>
-
-              {/* <p>User Operation Hash: {uoHash}</p>
-<p>Transaction Hash: {txHash}</p> */}
-
-              {/* <Balance address={accountAddress} /> */}
               <div className="card w-96 bg-primary text-primary-content">
                 <div className="card-body">
                   <h2 className="card-title">Transfer Tokens</h2>
