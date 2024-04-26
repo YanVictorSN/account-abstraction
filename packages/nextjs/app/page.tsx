@@ -24,6 +24,7 @@ const Home: NextPage = () => {
   const [txHash, setTxHash] = useState<string>("");
   const [balance, setBalance] = useState<bigint>(0n);
   const [address, setAddress] = useState("");
+  const [ownerAddress, setOwneraddress] = useState("");
   const [txValue, setTxValue] = useState<string | bigint>("");
   const [tokensData, setTokensData] = useState<any>([]);
   const { latestTransaction, onUserTxConfirm, onTxReject } = useImpersonatorIframe();
@@ -114,12 +115,22 @@ const Home: NextPage = () => {
   };
 
   const webAddress = async () => {
-    // extend smart account client with multiOwnerPluginActions to call MultiOwnerPlugin methods
     const pluginActionExtendedClient = provider.extend(multiOwnerPluginActions);
-
-    // owners is an array of the addresses of the account owners
     const owners = await pluginActionExtendedClient.readOwners();
     console.log(owners);
+  };
+
+  const addOwnerAddress = async () => {
+    const ownerstoAdd = ownerAddress;
+    const ownersToRemove = [];
+    const ownersToAdd = [ownerstoAdd];
+    const pluginActionExtendedClient = provider.extend(multiOwnerPluginActions);
+    const result = await pluginActionExtendedClient.updateOwners({
+      args: [ownersToAdd, ownersToRemove],
+    });
+    console.log(result);
+    const txHash = await pluginActionExtendedClient.waitForUserOperationTransaction(result);
+    console.log(txHash);
   };
 
   const transfer = async () => {
@@ -254,6 +265,15 @@ const Home: NextPage = () => {
                   Disconnect
                 </button>
                 <button onClick={tokenBalancers}>TokenBalance</button>
+                <div className="card w-96 bg-primary text-primary-content">
+                  <div className="card-body">
+                    <h2 className="card-title">Add Owner</h2>
+                    <AddressInput onChange={setOwneraddress} value={ownerAddress} placeholder="Set new owner address" />
+                    <div className="card-actions justify-center">
+                      <button onClick={addOwnerAddress}>Add New Owner</button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <button className="btn" onClick={() => document.getElementById("my_modal_3").showModal()}>
