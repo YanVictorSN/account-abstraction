@@ -226,22 +226,31 @@ const Home: NextPage = () => {
                 <div className="card-body items-center text-center">
                   <h2 className="card-title">Hello, {userNameAuth.name}:</h2>
                   <p>
-                    <Address address={accountAddress} />
+                    <Address size="lg" address={accountAddress} />
                     <p>Balance:</p>
                     <p>{balance.toString()}</p>
-                    {tokensData.map((token: any, index: any) => {
-                      return (
-                        <div key={index}>
-                          <p>{token.symbol}</p>
-                          <p>{token.balance}</p>
-                          {/* <img src={token.image} alt="token" /> */}
-                        </div>
-                      );
-                    })}
+                    <div className="dropdown dropdown-bottom">
+                      <div tabIndex={0} role="button" className="btn m-1">
+                        Tokens
+                      </div>
+                      <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                        {tokensData.map((token: any, index: any) => {
+                          return (
+                            <li key={index}>
+                              <a>
+                                {token.symbol}
+                                {token.balance}
+                              </a>
+                              {/* <img src={token.image} alt="token" /> */}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
                   </p>
                 </div>
               </div>
-              <div className="card w-96 bg-primary text-primary-content">
+              <div className="card bg-primary text-primary-content">
                 <div className="card-body">
                   <h2 className="card-title">Transfer Tokens</h2>
                   <AddressInput onChange={setAddress} value={address} placeholder="Input your address" />
@@ -259,12 +268,7 @@ const Home: NextPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex row">
-                <button onClick={webAddress}>See Owners</button>
-                <button onClick={disconnect} className="btn btn-error">
-                  Disconnect
-                </button>
-                <button onClick={tokenBalancers}>TokenBalance</button>
+              <div className="flex flex-col">
                 <div className="card w-96 bg-primary text-primary-content">
                   <div className="card-body">
                     <h2 className="card-title">Add Owner</h2>
@@ -274,6 +278,11 @@ const Home: NextPage = () => {
                     </div>
                   </div>
                 </div>
+                <button onClick={webAddress}>See Owners</button>
+                <button onClick={disconnect} className="btn btn-error">
+                  Disconnect
+                </button>
+                <button onClick={tokenBalancers}>TokenBalance</button>
               </div>
             </div>
             <button className="btn" onClick={() => document.getElementById("my_modal_3").showModal()}>
